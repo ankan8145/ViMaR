@@ -1,0 +1,50 @@
+# deepspeed_zero3.yaml
+main_process_port: 29500
+# ► Environment & compute
+compute_environment: vimar
+distributed_type: DEEPSPEED
+mixed_precision: bf16
+downcast_bf16: no
+downcast_fp16: no
+use_cpu: false
+
+# ► How many GPUs / processes
+num_processes: 8         # one process per GPU
+num_machines: 1
+machine_rank: 0
+same_network: true
+
+# ► Main process networking (must match your script’s port if you pin one)
+main_process_ip: null
+# main_process_port: 29501
+
+# ► DeepSpeed ZeRO Stage 3 config
+deepspeed_config:
+  zero_optimization:
+    stage: 3
+    offload_optimizer:
+      device: cpu
+      pin_memory: true
+    offload_param:
+      device: cpu
+      pin_memory: true
+    contiguous_gradients: true
+    reduce_bucket_size: 500000000
+    stage3_prefetch_bucket_size: 500000000
+    stage3_param_persistence_threshold: 1000000
+
+  # (Optional) DeepSpeed optimizer & scheduler defaults — you can override via CLI
+  optimizer:
+    type: AdamW
+    params:
+      lr: 5e-5
+      betas: [0.9, 0.999]
+      eps: 1e-8
+
+  scheduler:
+    type: linear
+    params:
+      warmup_ratio: 0.03
+
+# ► FSDP (not used)
+fsdp_config: {}
